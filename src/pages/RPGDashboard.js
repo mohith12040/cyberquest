@@ -1,8 +1,11 @@
 // src/pages/RPGDashboard.js
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import sampleChallenges from '../data/sampleChallenges';
+
 const RPGDashboard = () => {
+  const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [xp, setXp] = useState(0);
   const [completed, setCompleted] = useState([]);
@@ -11,11 +14,19 @@ const RPGDashboard = () => {
   const [answers, setAnswers] = useState([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [showResults, setShowResults] = useState(false);
+  const [currentQuest, setCurrentQuest] = useState(null);
+
+  useEffect(() => {
+    const foundQuest = sampleChallenges.find((q) => q.id === parseInt(id));
+    if (foundQuest) {
+      setCurrentQuest(foundQuest);
+    }
+  }, [id]);
 
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       if (data) {
         setProfile(data);
         setXp(data.xp || 0);
@@ -25,10 +36,11 @@ const RPGDashboard = () => {
     fetchProfile();
   }, []);
 
-  const startQuiz = (challenge) => {
+  const startQuiz = () => {
+    if (!currentQuest) return;
     setActiveQuiz({
-      ...challenge,
-      questions: challenge.quiz.questions.sort(() => Math.random() - 0.5)
+      ...currentQuest,
+      questions: currentQuest.quiz.questions.sort(() => Math.random() - 0.5)
     });
     setQuizIndex(0);
     setAnswers([]);
@@ -42,7 +54,7 @@ const RPGDashboard = () => {
       setQuizIndex(quizIndex + 1);
     } else {
       setShowResults(true);
-      handleComplete(activeQuiz);
+      handleComplete(currentQuest);
     }
   };
 
@@ -60,29 +72,20 @@ const RPGDashboard = () => {
     }).eq('id', profile.id);
   };
 
+  if (!currentQuest) return <div className="text-white p-6">Quest not found.</div>;
+
   return (
     <div className="max-w-3xl mx-auto text-white px-4 pb-24">
-      <h1 className="text-3xl font-bold mb-4">Welcome, Agent {profile?.email}</h1>
-      <p className="mb-6">XP: <strong>{xp}</strong></p>
-
-      <h2 className="text-2xl font-semibold mb-4">Quests</h2>
-      <div className="space-y-4">
-        {sampleChallenges.map((ch) => (
-          <div key={ch.id} className="bg-gray-800 p-4 rounded shadow">
-            <h3 className="text-xl font-bold mb-2">{ch.title}</h3>
-            <p className="mb-2 text-gray-300">{ch.description}</p>
-            <p className="text-sm text-gray-400">Topic: {ch.topic} • XP: {ch.xp}</p>
-            {!completed.includes(ch.id) ? (
-              <div className="space-x-2 mt-2">
-                <button onClick={() => setActiveTutorial(ch)} className="px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600">Read Tutorial</button>
-                <button onClick={() => startQuiz(ch)} className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700">Start Quiz</button>
-              </div>
-            ) : (
-              <p className="mt-2 text-green-400">✓ Quest Completed</p>
-            )}
-          </div>
-        ))}
-      </div>
+      <h1 className="text-3xl font-bold mb-2">{currentQuest.title}</h1>
+      <p className="text-gray-300 mb-4">{currentQuest.description}</p>
+      {!completed.includes(currentQuest.id) ? (
+        <div className="space-x-2 mb-4">
+          <button onClick={() => setActiveTutorial(currentQuest)} className="px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600">Read Tutorial</button>
+          <button onClick={startQuiz} className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700">Start Quiz</button>
+        </div>
+      ) : (
+        <p className="text-green-400 mb-4">✓ Quest Completed</p>
+      )}
 
       {/* Tutorial Modal */}
       {activeTutorial && (

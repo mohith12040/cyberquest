@@ -1,4 +1,3 @@
-// src/pages/Home.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -44,16 +43,14 @@ function Home({ session }) {
       <h2 className="text-2xl font-semibold mb-4">Available Quests</h2>
       <div className="grid sm:grid-cols-2 gap-4">
         {quests.map((quest) => (
-          <div key={quest.id} className="bg-gray-800 rounded p-4 shadow hover:shadow-lg transition-all">
+          <Link
+            key={quest.id}
+            to={`/rpg/${quest.id}`}
+            className="block bg-gray-800 rounded p-4 shadow hover:shadow-lg transition-all"
+          >
             <h3 className="text-xl font-bold mb-1">{quest.title}</h3>
-            <p className="text-sm text-gray-300 mb-2">{quest.description}</p>
-            <Link
-              to="/rpg"
-              className="inline-block mt-2 px-4 py-1 bg-purple-600 hover:bg-purple-700 text-sm rounded"
-            >
-              Go to RPG
-            </Link>
-          </div>
+            <p className="text-sm text-gray-300">{quest.description}</p>
+          </Link>
         ))}
       </div>
     </div>

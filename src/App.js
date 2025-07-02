@@ -33,7 +33,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/leaderboard" element={session ? <Leaderboard /> : <Navigate to="/login" />} />
-	  <Route path="/rpg" element={<RPGDashboard />} />
+	  <Route path="/rpg/:id" element={session ? <RPGDashboard /> : <Navigate to="/login" />} />
         </Routes>
       </Layout>
     </Router>
