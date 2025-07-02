@@ -1,58 +1,42 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
+import Signup from './Signup';
+import Login from './Login';
+import Home from './Home';
+import Leaderboard from './Leaderboard';
+import Layout from './Layout';
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
 
-  // Check if user is logged in on load
   useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
     });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null);
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
     });
 
     return () => {
-      authListener?.subscription.unsubscribe();
+      listener?.subscription.unsubscribe();
     };
   }, []);
 
-  // GitHub login handler
-  const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-    });
-    if (error) console.error('Login error:', error.message);
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
-
   return (
-    <div>
-      <h1>CyberQuest</h1>
-      {user ? (
-        <div>
-          <p>Welcome, {user.email}</p>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
-      ) : (
-        <button onClick={handleLogin}>Login with GitHub</button>
-      )}
-    </div>
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={session ? <Home session={session} /> : <Navigate to="/login" />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/leaderboard" element={session ? <Leaderboard /> : <Navigate to="/login" />} />
+        </Routes>
+      </Layout>
+    </Router>
   );
 }
 
 export default App;
-
-const handleLogin = async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'github'
-  });
-  if (error) console.error('Login error:', error.message);
-};
 

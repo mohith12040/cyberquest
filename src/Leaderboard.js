@@ -1,38 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+import React from 'react';
 
-export default function Leaderboard() {
-  const [players, setPlayers] = useState([]);
-
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      const { data, error } = await supabase
-        .from("players")
-        .select("*")
-        .order("level", { ascending: false })
-        .order("xp", { ascending: false });
-
-      if (data) setPlayers(data);
-      else console.error("Error loading leaderboard:", error);
-    };
-
-    fetchPlayers();
-  }, []);
+function Leaderboard() {
+  const players = [
+    { name: 'Alice', level: 8 },
+    { name: 'Bob', level: 6 },
+    { name: 'Charlie', level: 4 },
+  ];
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-bold text-gray-700 mb-2">🏆 Leaderboard</h2>
-      <ul className="inline-block text-left">
-        {players.map((p, i) => (
-          <li
-            key={p.user_id}
-            className="py-1 text-sm border-b border-gray-200"
-          >
-            <span className="font-bold">{i + 1}.</span> {p.email} — Lv {p.level} · {p.xp} XP
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Leaderboard</h2>
+      <ul className="space-y-2">
+        {players.map((player, i) => (
+          <li key={i} className="bg-gray-800 p-4 rounded">
+            {i + 1}. {player.name} - Level {player.level}
           </li>
         ))}
       </ul>
     </div>
   );
 }
+
+export default Leaderboard;
 
