@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
-import Signup from './Signup';
-import Login from './Login';
 import Home from './Home';
-import Leaderboard from './Leaderboard';
-import Layout from './Layout';
+import Signup from './components/Signup';
+import Login from './components/Login';
+import Leaderboard from './components/Leaderboard';
+import Layout from './components/Layout';
 
 function App() {
   const [session, setSession] = useState(null);
