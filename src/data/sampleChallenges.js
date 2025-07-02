@@ -1,3 +1,4 @@
+// src/data/sampleChallenges.js
 const sampleChallenges = [
   {
     id: 1,
