@@ -9,6 +9,15 @@ const sampleChallenges = [
     description: 'Identify phishing indicators in real email screenshots.',
     xp: 50,
     topic: 'Phishing',
+    tutorial: `Phishing is a type of social engineering attack often used to steal user data, including login credentials and credit card numbers.
+
+Common red flags include:
+- Generic greetings like "Dear user"
+- Urgent or threatening language ("Your account will be closed")
+- Misspelled domain names (e.g. paypa1.com instead of paypal.com)
+- Unexpected attachments or links
+
+Always hover over links to verify the actual destination, and never download unexpected attachments.`,
     quiz: {
       question: 'Which of the following is a red flag for phishing?',
       options: [
@@ -19,21 +28,14 @@ const sampleChallenges = [
       ],
       correctIndex: 1
     }
-  },
-  {
-    id: 2,
-    title: 'Password Cracker',
-    description: 'Use a dictionary attack simulation to guess weak passwords.',
-    xp: 60,
-    topic: 'Authentication'
   }
-  // ... other challenges remain the same for brevity
 ];
 
 const RPGDashboard = () => {
   const [profile, setProfile] = useState(null);
   const [xp, setXp] = useState(0);
   const [completed, setCompleted] = useState([]);
+  const [activeTutorial, setActiveTutorial] = useState(null);
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
@@ -55,7 +57,7 @@ const RPGDashboard = () => {
       setFeedback('Correct! You gained ' + challenge.xp + ' XP.');
       handleComplete(challenge);
     } else {
-      setFeedback('Incorrect. Try reviewing phishing red flags and come back.');
+      setFeedback('Incorrect. Review the tutorial and try again.');
     }
     setTimeout(() => {
       setActiveQuiz(null);
@@ -89,29 +91,53 @@ const RPGDashboard = () => {
             <h3 className="text-xl font-bold">{ch.title}</h3>
             <p>{ch.description}</p>
             <p className="text-sm text-gray-400">Topic: {ch.topic} • XP: {ch.xp}</p>
-            {!completed.includes(ch.id) && ch.quiz ? (
-              <button
-                onClick={() => setActiveQuiz(ch)}
-                className="mt-2 px-4 py-1 rounded bg-blue-600 hover:bg-blue-700"
-              >
-                Start Quiz
-              </button>
-            ) : (
+            {!completed.includes(ch.id) && (
+              <div className="space-x-2">
+                <button
+                  onClick={() => setActiveTutorial(ch)}
+                  className="mt-2 px-4 py-1 rounded bg-yellow-600 hover:bg-yellow-700"
+                >
+                  Read Tutorial
+                </button>
+                <button
+                  onClick={() => setActiveQuiz(ch)}
+                  className="mt-2 px-4 py-1 rounded bg-blue-600 hover:bg-blue-700"
+                >
+                  Start Quiz
+                </button>
+              </div>
+            )}
+            {completed.includes(ch.id) && (
               <button
                 disabled
                 className="mt-2 px-4 py-1 rounded bg-gray-600 cursor-not-allowed"
               >
-                {completed.includes(ch.id) ? 'Completed' : 'No Quiz'}
+                Completed
               </button>
             )}
           </div>
         ))}
       </div>
 
+      {activeTutorial && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded shadow-lg max-w-xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4">{activeTutorial.title} - Tutorial</h3>
+            <pre className="text-sm whitespace-pre-wrap text-gray-300">{activeTutorial.tutorial}</pre>
+            <button
+              onClick={() => setActiveTutorial(null)}
+              className="mt-4 px-4 py-1 rounded bg-red-600 hover:bg-red-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {activeQuiz && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-6 rounded shadow-lg max-w-md">
-            <h3 className="text-xl font-bold mb-4">{activeQuiz.title}</h3>
+            <h3 className="text-xl font-bold mb-4">{activeQuiz.title} - Quiz</h3>
             <p className="mb-4">{activeQuiz.quiz.question}</p>
             {activeQuiz.quiz.options.map((option, idx) => (
               <button
