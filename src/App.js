@@ -10,7 +10,7 @@ import RPGDashboard from './pages/RPGDashboard';
 
 function App() {
   const [session, setSession] = useState(null);
-
+  console.log("Home rendered. Quests:", quests);
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
