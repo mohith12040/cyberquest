@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import sampleChallenges from '../data/sampleChallenges';
-
 const RPGDashboard = () => {
   const [profile, setProfile] = useState(null);
   const [xp, setXp] = useState(0);
