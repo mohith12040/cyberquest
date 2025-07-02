@@ -6,6 +6,7 @@ import Signup from './components/Signup';
 import Login from './components/Login';
 import Leaderboard from './components/Leaderboard';
 import Layout from './components/Layout';
+import RPGDashboard from './pages/RPGDashboard';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -32,6 +33,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/leaderboard" element={session ? <Leaderboard /> : <Navigate to="/login" />} />
+	  <Route path="/rpg" element={<RPGDashboard />} />
         </Routes>
       </Layout>
     </Router>
