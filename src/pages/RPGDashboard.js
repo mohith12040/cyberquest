@@ -1,35 +1,7 @@
 // src/pages/RPGDashboard.js
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
-
-const sampleChallenges = [
-  {
-    id: 1,
-    title: 'Spot the Phish',
-    description: 'Identify phishing indicators in real email screenshots.',
-    xp: 50,
-    topic: 'Phishing',
-    tutorial: `Phishing is a type of social engineering attack often used to steal user data, including login credentials and credit card numbers.
-
-Common red flags include:
-- Generic greetings like "Dear user"
-- Urgent or threatening language ("Your account will be closed")
-- Misspelled domain names (e.g. paypa1.com instead of paypal.com)
-- Unexpected attachments or links
-
-Always hover over links to verify the actual destination, and never download unexpected attachments.`,
-    quiz: {
-      question: 'Which of the following is a red flag for phishing?',
-      options: [
-        'An email from your known contact with proper grammar',
-        'An unexpected email with urgent action required and suspicious link',
-        'A weekly newsletter you subscribed to',
-        'A message from your cloud storage reminding you of space limits'
-      ],
-      correctIndex: 1
-    }
-  }
-];
+import sampleChallenges from '../data/sampleChallenges';
 
 const RPGDashboard = () => {
   const [profile, setProfile] = useState(null);
@@ -37,7 +9,9 @@ const RPGDashboard = () => {
   const [completed, setCompleted] = useState([]);
   const [activeTutorial, setActiveTutorial] = useState(null);
   const [activeQuiz, setActiveQuiz] = useState(null);
-  const [feedback, setFeedback] = useState(null);
+  const [answers, setAnswers] = useState([]);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -52,17 +26,25 @@ const RPGDashboard = () => {
     fetchProfile();
   }, []);
 
-  const handleAnswer = (index, challenge) => {
-    if (index === challenge.quiz.correctIndex) {
-      setFeedback('Correct! You gained ' + challenge.xp + ' XP.');
-      handleComplete(challenge);
+  const startQuiz = (challenge) => {
+    setActiveQuiz({
+      ...challenge,
+      questions: challenge.quiz.questions.sort(() => Math.random() - 0.5)
+    });
+    setQuizIndex(0);
+    setAnswers([]);
+    setShowResults(false);
+  };
+
+  const handleAnswer = (selectedIdx) => {
+    const question = activeQuiz.questions[quizIndex];
+    setAnswers([...answers, { selectedIdx, correctIdx: question.correctIndex }]);
+    if (quizIndex + 1 < activeQuiz.questions.length) {
+      setQuizIndex(quizIndex + 1);
     } else {
-      setFeedback('Incorrect. Review the tutorial and try again.');
+      setShowResults(true);
+      handleComplete(activeQuiz);
     }
-    setTimeout(() => {
-      setActiveQuiz(null);
-      setFeedback(null);
-    }, 3000);
   };
 
   const handleComplete = async (challenge) => {
@@ -80,75 +62,83 @@ const RPGDashboard = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto text-white">
+    <div className="max-w-3xl mx-auto text-white px-4 pb-24">
       <h1 className="text-3xl font-bold mb-4">Welcome, Agent {profile?.email}</h1>
       <p className="mb-6">XP: <strong>{xp}</strong></p>
 
-      <h2 className="text-2xl font-semibold mb-2">Quests</h2>
+      <h2 className="text-2xl font-semibold mb-4">Quests</h2>
       <div className="space-y-4">
         {sampleChallenges.map((ch) => (
-          <div key={ch.id} className="bg-gray-800 p-4 rounded">
-            <h3 className="text-xl font-bold">{ch.title}</h3>
-            <p>{ch.description}</p>
+          <div key={ch.id} className="bg-gray-800 p-4 rounded shadow">
+            <h3 className="text-xl font-bold mb-2">{ch.title}</h3>
+            <p className="mb-2 text-gray-300">{ch.description}</p>
             <p className="text-sm text-gray-400">Topic: {ch.topic} • XP: {ch.xp}</p>
-            {!completed.includes(ch.id) && (
-              <div className="space-x-2">
-                <button
-                  onClick={() => setActiveTutorial(ch)}
-                  className="mt-2 px-4 py-1 rounded bg-yellow-600 hover:bg-yellow-700"
-                >
-                  Read Tutorial
-                </button>
-                <button
-                  onClick={() => setActiveQuiz(ch)}
-                  className="mt-2 px-4 py-1 rounded bg-blue-600 hover:bg-blue-700"
-                >
-                  Start Quiz
-                </button>
+            {!completed.includes(ch.id) ? (
+              <div className="space-x-2 mt-2">
+                <button onClick={() => setActiveTutorial(ch)} className="px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600">Read Tutorial</button>
+                <button onClick={() => startQuiz(ch)} className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700">Start Quiz</button>
               </div>
-            )}
-            {completed.includes(ch.id) && (
-              <button
-                disabled
-                className="mt-2 px-4 py-1 rounded bg-gray-600 cursor-not-allowed"
-              >
-                Completed
-              </button>
+            ) : (
+              <p className="mt-2 text-green-400">✓ Quest Completed</p>
             )}
           </div>
         ))}
       </div>
 
+      {/* Tutorial Modal */}
       {activeTutorial && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded shadow-lg max-w-xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">{activeTutorial.title} - Tutorial</h3>
-            <pre className="text-sm whitespace-pre-wrap text-gray-300">{activeTutorial.tutorial}</pre>
-            <button
-              onClick={() => setActiveTutorial(null)}
-              className="mt-4 px-4 py-1 rounded bg-red-600 hover:bg-red-700"
-            >
-              Close
-            </button>
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 max-w-2xl rounded overflow-y-auto max-h-[90vh] shadow-xl">
+            <h3 className="text-2xl font-bold mb-4">{activeTutorial.title} - Tutorial</h3>
+            <pre className="whitespace-pre-wrap text-sm text-gray-200 leading-relaxed">{activeTutorial.tutorial}</pre>
+            <div className="text-right mt-4">
+              <button onClick={() => setActiveTutorial(null)} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Close</button>
+            </div>
           </div>
         </div>
       )}
 
-      {activeQuiz && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded shadow-lg max-w-md">
-            <h3 className="text-xl font-bold mb-4">{activeQuiz.title} - Quiz</h3>
-            <p className="mb-4">{activeQuiz.quiz.question}</p>
-            {activeQuiz.quiz.options.map((option, idx) => (
+      {/* Quiz Modal */}
+      {activeQuiz && !showResults && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded max-w-lg w-full shadow-xl">
+            <h3 className="text-xl font-bold mb-2">{activeQuiz.title} - Question {quizIndex + 1} of {activeQuiz.questions.length}</h3>
+            <p className="mb-4 text-gray-300">{activeQuiz.questions[quizIndex].question}</p>
+            {activeQuiz.questions[quizIndex].options.map((option, idx) => (
               <button
                 key={idx}
-                onClick={() => handleAnswer(idx, activeQuiz)}
-                className="block w-full text-left px-4 py-2 my-1 bg-gray-700 hover:bg-purple-600 rounded"
+                onClick={() => handleAnswer(idx)}
+                className="block w-full text-left bg-gray-700 hover:bg-purple-600 text-white px-4 py-2 rounded mb-2"
               >
                 {option}
               </button>
             ))}
-            {feedback && <p className="mt-4 text-sm text-yellow-300">{feedback}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Results Modal */}
+      {activeQuiz && showResults && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded max-w-lg w-full shadow-xl">
+            <h3 className="text-xl font-bold mb-4">{activeQuiz.title} - Results</h3>
+            <p className="mb-4">You scored <strong>{answers.filter(a => a.selectedIdx === a.correctIdx).length}</strong> out of {answers.length}</p>
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+              {activeQuiz.questions.map((q, idx) => (
+                <div key={idx} className="bg-gray-800 p-3 rounded">
+                  <p className="text-sm font-semibold text-white">Q{idx + 1}: {q.question}</p>
+                  <p className={`text-sm mt-1 ${answers[idx].selectedIdx === q.correctIndex ? 'text-green-400' : 'text-red-400'}`}>
+                    Your answer: {q.options[answers[idx].selectedIdx]}
+                  </p>
+                  {answers[idx].selectedIdx !== q.correctIndex && (
+                    <p className="text-sm text-green-300">Correct answer: {q.options[q.correctIndex]}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="text-right mt-4">
+              <button onClick={() => setActiveQuiz(null)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">Close</button>
+            </div>
           </div>
         </div>
       )}
