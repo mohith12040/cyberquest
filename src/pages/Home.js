@@ -1,5 +1,7 @@
-import React from 'react';
+// src/pages/Home.js
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 
 const quests = [
   {
@@ -35,18 +37,37 @@ const quests = [
 ];
 
 function Home({ session }) {
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    const getUsername = async () => {
+      const { data, error } = await supabase
+        .from('Players')
+        .select('username')
+        .eq('id', session.user.id)
+        .single();
+
+      if (data?.username) setUsername(data.username);
+      else console.error('Username fetch failed:', error?.message);
+    };
+
+    getUsername();
+  }, [session]);
+
   return (
     <div className="px-4 py-8 text-white min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       <h1 className="text-4xl font-bold mb-2">Welcome to CyberQuest</h1>
-      <p className="text-gray-400 mb-6">Logged in as {session.user.email}</p>
+      <p className="text-gray-400 mb-6">
+        Logged in as <span className="text-white font-semibold">{username || session.user.email}</span>
+      </p>
 
       <h2 className="text-2xl font-semibold mb-4">Available Quests</h2>
       <div className="grid sm:grid-cols-2 gap-4">
         {quests.map((quest) => (
           <Link
             key={quest.id}
-            to={quest.id === 1 ? '/rpg/1' : `/rpg/${quest.id}`}
-            className="block bg-gray-800 rounded-lg p-4 shadow hover:shadow-lg transition-all hover:bg-purple-700/20"
+            to={`/rpg/${quest.id}`}
+            className="block bg-gray-800 rounded p-4 shadow hover:shadow-lg transition-all"
           >
             <h3 className="text-xl font-bold mb-1">{quest.title}</h3>
             <p className="text-sm text-gray-300">{quest.description}</p>

@@ -4,15 +4,29 @@ import { useNavigate } from 'react-router-dom';
 import sampleChallenges from '../data/sampleChallenges';
 import { motion, AnimatePresence } from 'framer-motion';
 import { marked } from 'marked';
+import { supabase } from '../supabaseClient';
 
-function PhishingQuest() {
+function PhishingQuest({ session }) {
   const challenge = sampleChallenges.find((q) => q.id === 1);
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [startQuiz, setStartQuiz] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [playerData, setPlayerData] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPlayer = async () => {
+      const { data, error } = await supabase.from('Players').select('*').eq('id', session.user.id).single();
+      if (data) {
+        setPlayerData(data);
+      }
+      setLoading(false);
+    };
+    fetchPlayer();
+  }, [session]);
 
   useEffect(() => {
     if (startQuiz) {
@@ -27,7 +41,16 @@ function PhishingQuest() {
       setCurrent(current + 1);
     } else {
       setShowResults(true);
+      updateXP();
     }
+  };
+
+  const updateXP = async () => {
+    const correctCount = answers.filter((a, i) => a === questions[i].correctIndex).length;
+    const gainedXP = correctCount * 10;
+    const newXP = (playerData?.xp || 0) + gainedXP;
+    const newLevel = Math.floor(newXP / 60) + 1;
+    await supabase.from('Players').update({ xp: newXP, level: newLevel }).eq('id', session.user.id);
   };
 
   const restart = () => {
@@ -38,6 +61,8 @@ function PhishingQuest() {
   };
 
   const correctCount = answers.filter((a, i) => a === questions[i].correctIndex).length;
+
+  if (loading) return <div className="text-white p-4">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8 flex flex-col items-center justify-start">
@@ -134,4 +159,3 @@ function PhishingQuest() {
 }
 
 export default PhishingQuest;
-
