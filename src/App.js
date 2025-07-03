@@ -9,7 +9,6 @@ import Leaderboard from './components/Leaderboard';
 import Layout from './components/Layout';
 import RPGDashboard from './pages/RPGDashboard';
 import PhishingQuest from './pages/PhishingQuest';
-import Profile from './components/Profile';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -38,7 +37,6 @@ function App() {
           <Route path="/leaderboard" element={session ? <Leaderboard /> : <Navigate to="/login" />} />
           <Route path="/rpg/:id" element={session ? <RPGDashboard /> : <Navigate to="/login" />} />
           <Route path="/phishing" element={session ? <PhishingQuest session={session} /> : <Navigate to="/login" />} /> {/* ✅ updated */}
-	  <Route path="/profile" element={session ? <Profile session={session} /> : <Navigate to="/login" />} />
         </Routes>
       </Layout>
     </Router>

@@ -1,56 +1,61 @@
-// src/pages/Profile.js
+// src/components/Profile.js
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 
 function Profile({ session }) {
-  const [player, setPlayer] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!session || !session.user) return;
-
       const { data, error } = await supabase
         .from('Players')
-        .select('username, email, xp, level, phone, avatar_url')
-        .eq('id', session.user.id)
+        .select('username, email, phone, level, xp, avatar_url')
+        .eq('UID', session.user.id)
         .single();
 
-      if (error) console.error('Error fetching profile:', error.message);
-      else setPlayer(data);
-
+      if (data) setProfile(data);
+      else console.error('Profile fetch error:', error?.message);
       setLoading(false);
     };
 
-    fetchProfile();
+    if (session?.user?.id) {
+      fetchProfile();
+    }
   }, [session]);
 
-  if (loading) return <div className="text-white p-4">Loading profile...</div>;
+  if (loading) {
+    return <div className="text-white p-6 text-center">Loading profile...</div>;
+  }
+
+  if (!profile) {
+    return <div className="text-red-500 p-6 text-center">Profile not found.</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <div className="max-w-2xl mx-auto bg-gray-800 rounded-xl p-6 shadow-lg">
-        <div className="flex items-center space-x-4">
-          {player?.avatar_url ? (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white px-4 py-8">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md text-center">
+        <div className="flex justify-center mb-4">
+          {profile.avatar_url ? (
             <img
-              src={player.avatar_url}
-              alt="Profile"
-              className="w-16 h-16 rounded-full object-cover"
+              src={profile.avatar_url}
+              alt="Avatar"
+              className="w-24 h-24 rounded-full border-2 border-purple-500"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-2xl font-bold">
-              {player?.username?.[0]?.toUpperCase() || 'U'}
+            <div className="w-24 h-24 flex items-center justify-center rounded-full bg-purple-600 text-3xl font-bold">
+              {profile.username?.[0]?.toUpperCase() || '?'}
             </div>
           )}
-          <div>
-            <h2 className="text-xl font-bold">{player?.username}</h2>
-            <p className="text-gray-400 text-sm">{player?.email}</p>
-            {player?.phone && <p className="text-sm text-gray-400">📞 {player.phone}</p>}
-          </div>
         </div>
-        <div className="mt-6 space-y-2">
-          <p>Level: <span className="font-semibold">{player?.level}</span></p>
-          <p>XP: <span className="font-semibold">{player?.xp}</span></p>
+
+        <h2 className="text-2xl font-bold mb-2">{profile.username}</h2>
+        <p className="text-sm text-gray-400 mb-4">{profile.email}</p>
+
+        <div className="space-y-2 text-left">
+          <p><strong>📞 Phone:</strong> {profile.phone || 'Not provided'}</p>
+          <p><strong>🏆 Level:</strong> {profile.level}</p>
+          <p><strong>⭐ XP:</strong> {profile.xp}</p>
         </div>
       </div>
     </div>
