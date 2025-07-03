@@ -12,28 +12,8 @@ const quests = [
   },
   {
     id: 2,
-    title: 'Password Cracker',
-    description: 'Understand how passwords are attacked and how to make them secure.'
-  },
-  {
-    id: 4,
-    title: 'SQLi: Break the Database',
-    description: 'Explore SQL Injection and how to defend against it.'
-  },
-  {
-    id: 5,
-    title: 'Find the Open Ports',
-    description: 'Use scanning tools to discover vulnerable network services.'
-  },
-  {
-    id: 6,
-    title: 'XSS Cleanup Mission',
-    description: 'Learn how cross-site scripting attacks work and how to neutralize them.'
-  },
-  {
-    id: 7,
-    title: 'Firewall Rules Master',
-    description: 'Set up and test firewall rules to block malicious traffic.'
+    title: 'Networking Basics',
+    description: 'Understand OSI & TCP/IP models and core network concepts.'
   }
 ];
 

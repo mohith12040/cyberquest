@@ -178,6 +178,248 @@ Phishing is more about **manipulating human behavior** than technical flaws. Lea
         }
       ]
     }
+  },
+  {
+    id: 2,
+    title: 'Networking Basics',
+    description: 'Understand OSI & TCP/IP models, IP addressing, and ports.',
+    xp: 100,
+    topic: 'Networking',
+    tutorial: `
+## 🌐 Networking Basics
+
+Computer networking is the practice of connecting computers and devices to share data, resources, and communication services. It forms the foundation of the internet and organizational intranets.
+
+---
+
+### 📘 OSI Model (Open Systems Interconnection)
+The OSI model standardizes communication into **7 layers**:
+
+1. **Application Layer (Layer 7)**
+   - Closest to the user
+   - Interfaces with applications
+   - Protocols: HTTP, SMTP, FTP
+
+2. **Presentation Layer (Layer 6)**
+   - Data translation, encryption, compression
+   - Examples: TLS/SSL, JPEG, MPEG
+
+3. **Session Layer (Layer 5)**
+   - Establishes, manages and terminates connections
+   - Example: NetBIOS, RPC
+
+4. **Transport Layer (Layer 4)**
+   - End-to-end communication
+   - Ensures reliable delivery (TCP) or fast, unreliable (UDP)
+
+5. **Network Layer (Layer 3)**
+   - Routing and logical addressing (IP addresses)
+   - Protocols: IP, ICMP
+
+6. **Data Link Layer (Layer 2)**
+   - MAC addresses, switches, error detection
+   - Protocols: Ethernet, PPP
+
+7. **Physical Layer (Layer 1)**
+   - Actual hardware transmission (cables, NICs)
+
+---
+
+### 📗 TCP/IP Model
+Used practically in the real world; has **4 layers**:
+
+1. **Application Layer**
+   - Includes OSI's Application, Presentation, and Session layers
+   - Protocols: HTTP, FTP, DNS, SMTP
+
+2. **Transport Layer**
+   - Same as OSI
+   - TCP (reliable), UDP (fast)
+
+3. **Internet Layer**
+   - Handles IP addressing and routing
+   - Protocols: IP, ICMP, ARP
+
+4. **Network Access Layer**
+   - Includes OSI's Data Link and Physical layers
+   - Deals with MAC, switches, physical media
+
+---
+
+### 🔍 Why These Models Matter
+- **Troubleshooting**: Helps isolate network issues (e.g., Layer 3 = routing issue)
+- **Design**: Guides protocol development and network architecture
+- **Education**: Builds foundational understanding for advanced topics
+
+---
+
+### ✅ Key Concepts
+- **IP Address**: Unique ID for devices (e.g., 192.168.1.1)
+- **MAC Address**: Physical hardware address (e.g., 00:1A:2B:3C:4D:5E)
+- **Subnetting**: Dividing networks for efficiency/security
+- **Ports**: Identify services (e.g., port 80 = HTTP)
+- **DNS**: Resolves domain names to IP addresses
+- **Firewall**: Filters traffic for security
+- **Router vs. Switch**: Router connects networks; switch connects devices within a network
+
+---
+
+Understanding the OSI and TCP/IP models helps you grasp how digital communication occurs and where things might go wrong.
+`,
+    quiz: {
+      questions: [
+        {
+          question: 'Which OSI layer handles IP addressing?',
+          options: ['Transport', 'Network', 'Session', 'Application'],
+          correctIndex: 1,
+        },
+        {
+          question: 'What is the role of the Transport layer?',
+          options: ['Data encryption', 'Session management', 'Reliable delivery', 'Routing'],
+          correctIndex: 2,
+        },
+        {
+          question: 'TCP belongs to which OSI layer?',
+          options: ['Data Link', 'Network', 'Transport', 'Session'],
+          correctIndex: 2,
+        },
+        {
+          question: 'Which protocol resolves domain names to IP addresses?',
+          options: ['DHCP', 'DNS', 'IP', 'FTP'],
+          correctIndex: 1,
+        },
+        {
+          question: 'Which device forwards packets based on IP?',
+          options: ['Switch', 'Hub', 'Router', 'Firewall'],
+          correctIndex: 2,
+        },
+        {
+          question: 'Which layer is responsible for encryption in OSI?',
+          options: ['Presentation', 'Application', 'Session', 'Network'],
+          correctIndex: 0,
+        },
+        {
+          question: 'Port 443 is used by which protocol?',
+          options: ['HTTP', 'SSH', 'HTTPS', 'FTP'],
+          correctIndex: 2,
+        },
+        {
+          question: 'Which OSI layer manages sessions?',
+          options: ['Session', 'Presentation', 'Transport', 'Application'],
+          correctIndex: 0,
+        },
+        {
+          question: 'What does MAC stand for?',
+          options: ['Media Access Control', 'Machine Address Code', 'Memory Access Channel', 'Modular Access Control'],
+          correctIndex: 0,
+        },
+        {
+          question: 'What is the main role of a switch?',
+          options: ['Connect networks', 'Assign IPs', 'Block ports', 'Connect devices in LAN'],
+          correctIndex: 3,
+        },
+        {
+          question: 'Which layer ensures data packets reach the correct application?',
+          options: ['Transport', 'Application', 'Session', 'Network'],
+          correctIndex: 0,
+        },
+        {
+          question: 'Which OSI layer is closest to the user?',
+          options: ['Transport', 'Application', 'Session', 'Data Link'],
+          correctIndex: 1,
+        },
+        {
+          question: 'DNS works at which OSI layer?',
+          options: ['Application', 'Network', 'Data Link', 'Physical'],
+          correctIndex: 0,
+        },
+        {
+          question: 'Which protocol is used to assign IP addresses dynamically?',
+          options: ['DNS', 'DHCP', 'FTP', 'SMTP'],
+          correctIndex: 1,
+        },
+        {
+          question: 'What’s the function of ICMP?',
+          options: ['Name resolution', 'Routing', 'Error reporting', 'Port scanning'],
+          correctIndex: 2,
+        },
+        {
+          question: 'Which of the following operates at Layer 2?',
+          options: ['Router', 'Switch', 'DNS', 'TCP'],
+          correctIndex: 1,
+        },
+        {
+          question: 'Which device operates at multiple OSI layers?',
+          options: ['Switch', 'Router', 'Bridge', 'Hub'],
+          correctIndex: 1,
+        },
+        {
+          question: 'What is the standard port for SSH?',
+          options: ['21', '22', '23', '25'],
+          correctIndex: 1,
+        },
+        {
+          question: 'Which protocol ensures message delivery order?',
+          options: ['UDP', 'IP', 'TCP', 'ARP'],
+          correctIndex: 2,
+        },
+        {
+          question: 'Which layer breaks data into segments?',
+          options: ['Transport', 'Data Link', 'Network', 'Physical'],
+          correctIndex: 0,
+        },
+        {
+          question: 'What is the default port number for HTTP?',
+          options: ['443', '22', '80', '21'],
+          correctIndex: 2,
+        },
+        {
+          question: 'What OSI layer would an Ethernet cable fall under?',
+          options: ['Data Link', 'Physical', 'Transport', 'Application'],
+          correctIndex: 1,
+        },
+        {
+          question: 'Which protocol is used for secure web browsing?',
+          options: ['FTP', 'HTTP', 'HTTPS', 'Telnet'],
+          correctIndex: 2,
+        },
+        {
+          question: 'A switch forwards traffic based on which address?',
+          options: ['IP address', 'MAC address', 'Port number', 'Hostname'],
+          correctIndex: 1,
+        },
+        {
+          question: 'Which OSI layer provides end-to-end communication?',
+          options: ['Network', 'Transport', 'Session', 'Application'],
+          correctIndex: 1,
+        },
+        {
+          question: 'Which tool helps identify device IPs on a network?',
+          options: ['Traceroute', 'Nmap', 'Wireshark', 'Ping'],
+          correctIndex: 1,
+        },
+        {
+          question: 'What is the purpose of subnetting?',
+          options: ['Speed up browsers', 'Create smaller broadcast domains', 'Hide MAC addresses', 'Encrypt data'],
+          correctIndex: 1,
+        },
+        {
+          question: 'Which protocol sends error messages back to sender?',
+          options: ['HTTP', 'ICMP', 'DNS', 'FTP'],
+          correctIndex: 1,
+        },
+        {
+          question: 'What does a firewall primarily monitor?',
+          options: ['Battery', 'IP addresses', 'Network traffic', 'Ports only'],
+          correctIndex: 2,
+        },
+        {
+          question: 'Which layer handles media and signal transmission?',
+          options: ['Network', 'Transport', 'Physical', 'Application'],
+          correctIndex: 2,
+        }
+      ]
+    }
   }
 ];
 

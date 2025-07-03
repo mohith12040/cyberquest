@@ -41,23 +41,28 @@ function PhishingQuest({ session }) {
       setCurrent(current + 1);
     } else {
       setShowResults(true);
-      updateXP();
     }
   };
 
-  const updateXP = async () => {
-    const correctCount = answers.filter((a, i) => a === questions[i].correctIndex).length;
-    const gainedXP = correctCount * 10;
-    const newXP = (playerData?.xp || 0) + gainedXP;
-    const newLevel = Math.floor(newXP / 60) + 1;
-    await supabase.from('Players').update({ xp: newXP, level: newLevel }).eq('id', session.user.id);
-  };
+  useEffect(() => {
+    const updateXP = async () => {
+      const correctCount = answers.filter((a, i) => a === questions[i].correctIndex).length;
+      const gainedXP = correctCount * 10;
+      const newXP = (playerData?.xp || 0) + gainedXP;
+      const newLevel = Math.floor(newXP / 60) + 1;
+      await supabase.from('Players').update({ xp: newXP, level: newLevel }).eq('id', session.user.id);
+    };
 
-  const restart = () => {
+    if (showResults && answers.length === questions.length) {
+      updateXP();
+    }
+  }, [showResults]);
+
+  const tryAgain = () => {
     setCurrent(0);
     setAnswers([]);
     setShowResults(false);
-    setStartQuiz(false);
+    setStartQuiz(true);
   };
 
   const correctCount = answers.filter((a, i) => a === questions[i].correctIndex).length;
@@ -145,7 +150,7 @@ function PhishingQuest({ session }) {
             </div>
             <div className="flex justify-between mt-6">
               <button
-                onClick={restart}
+                onClick={tryAgain}
                 className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
               >
                 Try Again
