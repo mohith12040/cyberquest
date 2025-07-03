@@ -45,8 +45,8 @@ function Home({ session }) {
         {quests.map((quest) => (
           <Link
             key={quest.id}
-            to={`/rpg/${quest.id}`}
-            className="block bg-gray-800 rounded p-4 shadow hover:shadow-lg transition-all"
+            to={quest.id === 1 ? '/rpg/1' : `/rpg/${quest.id}`}
+            className="block bg-gray-800 rounded-lg p-4 shadow hover:shadow-lg transition-all hover:bg-purple-700/20"
           >
             <h3 className="text-xl font-bold mb-1">{quest.title}</h3>
             <p className="text-sm text-gray-300">{quest.description}</p>

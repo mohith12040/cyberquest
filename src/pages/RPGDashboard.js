@@ -1,151 +1,113 @@
 // src/pages/RPGDashboard.js
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
 import sampleChallenges from '../data/sampleChallenges';
+import { marked } from 'marked';
 
-const RPGDashboard = () => {
+function RPGDashboard() {
   const { id } = useParams();
-  const [profile, setProfile] = useState(null);
-  const [xp, setXp] = useState(0);
-  const [completed, setCompleted] = useState([]);
-  const [activeTutorial, setActiveTutorial] = useState(null);
-  const [activeQuiz, setActiveQuiz] = useState(null);
-  const [answers, setAnswers] = useState([]);
-  const [quizIndex, setQuizIndex] = useState(0);
+  const challenge = sampleChallenges.find((c) => c.id === parseInt(id));
+
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState([]);
+  const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
-  const [currentQuest, setCurrentQuest] = useState(null);
 
   useEffect(() => {
-    const foundQuest = sampleChallenges.find((q) => q.id === parseInt(id));
-    if (foundQuest) {
-      setCurrentQuest(foundQuest);
+    if (challenge?.quiz?.questions) {
+      const shuffled = [...challenge.quiz.questions].sort(() => 0.5 - Math.random()).slice(0, 10);
+      setShuffledQuestions(shuffled);
     }
-  }, [id]);
+  }, [challenge]);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (data) {
-        setProfile(data);
-        setXp(data.xp || 0);
-        setCompleted(data.completed_challenges || []);
-      }
-    };
-    fetchProfile();
-  }, []);
+  const handleAnswer = (index) => {
+    const correct = shuffledQuestions[currentQuestion].correctIndex;
+    setSelectedAnswers([...selectedAnswers, index]);
+    if (index === correct) setScore(score + 1);
 
-  const startQuiz = () => {
-    if (!currentQuest) return;
-    setActiveQuiz({
-      ...currentQuest,
-      questions: currentQuest.quiz.questions.sort(() => Math.random() - 0.5)
-    });
-    setQuizIndex(0);
-    setAnswers([]);
-    setShowResults(false);
-  };
-
-  const handleAnswer = (selectedIdx) => {
-    const question = activeQuiz.questions[quizIndex];
-    setAnswers([...answers, { selectedIdx, correctIdx: question.correctIndex }]);
-    if (quizIndex + 1 < activeQuiz.questions.length) {
-      setQuizIndex(quizIndex + 1);
+    if (currentQuestion + 1 < shuffledQuestions.length) {
+      setCurrentQuestion(currentQuestion + 1);
     } else {
       setShowResults(true);
-      handleComplete(currentQuest);
     }
   };
 
-  const handleComplete = async (challenge) => {
-    if (completed.includes(challenge.id)) return;
-    const newXp = xp + challenge.xp;
-    const newCompleted = [...completed, challenge.id];
-
-    setXp(newXp);
-    setCompleted(newCompleted);
-
-    await supabase.from('profiles').update({
-      xp: newXp,
-      completed_challenges: newCompleted
-    }).eq('id', profile.id);
-  };
-
-  if (!currentQuest) return <div className="text-white p-6">Quest not found.</div>;
+  if (!challenge) return <div className="text-white p-4">Challenge not found</div>;
 
   return (
-    <div className="max-w-3xl mx-auto text-white px-4 pb-24">
-      <h1 className="text-3xl font-bold mb-2">{currentQuest.title}</h1>
-      <p className="text-gray-300 mb-4">{currentQuest.description}</p>
-      {!completed.includes(currentQuest.id) ? (
-        <div className="space-x-2 mb-4">
-          <button onClick={() => setActiveTutorial(currentQuest)} className="px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600">Read Tutorial</button>
-          <button onClick={startQuiz} className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700">Start Quiz</button>
-        </div>
-      ) : (
-        <p className="text-green-400 mb-4">✓ Quest Completed</p>
-      )}
+    <div className="p-6 text-white min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+      <h1 className="text-3xl font-bold mb-2">{challenge.title}</h1>
+      <p className="text-gray-400 mb-6">XP: {challenge.xp}</p>
 
-      {/* Tutorial Modal */}
-      {activeTutorial && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 max-w-2xl rounded overflow-y-auto max-h-[90vh] shadow-xl">
-            <h3 className="text-2xl font-bold mb-4">{activeTutorial.title} - Tutorial</h3>
-            <pre className="whitespace-pre-wrap text-sm text-gray-200 leading-relaxed">{activeTutorial.tutorial}</pre>
-            <div className="text-right mt-4">
-              <button onClick={() => setActiveTutorial(null)} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Close</button>
-            </div>
+      {!quizStarted && !showResults && (
+        <>
+          <div className="prose prose-invert max-w-none mb-6 whitespace-pre-line">
+            <h2 className="text-2xl font-semibold mb-4">Tutorial</h2>
+            <div dangerouslySetInnerHTML={{ __html: marked.parse(challenge.tutorial) }} />
           </div>
-        </div>
+          <button
+            onClick={() => setQuizStarted(true)}
+            className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded text-white font-semibold"
+          >
+            Start Quiz
+          </button>
+        </>
       )}
 
-      {/* Quiz Modal */}
-      {activeQuiz && !showResults && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded max-w-lg w-full shadow-xl">
-            <h3 className="text-xl font-bold mb-2">{activeQuiz.title} - Question {quizIndex + 1} of {activeQuiz.questions.length}</h3>
-            <p className="mb-4 text-gray-300">{activeQuiz.questions[quizIndex].question}</p>
-            {activeQuiz.questions[quizIndex].options.map((option, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleAnswer(idx)}
-                className="block w-full text-left bg-gray-700 hover:bg-purple-600 text-white px-4 py-2 rounded mb-2"
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Results Modal */}
-      {activeQuiz && showResults && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded max-w-lg w-full shadow-xl">
-            <h3 className="text-xl font-bold mb-4">{activeQuiz.title} - Results</h3>
-            <p className="mb-4">You scored <strong>{answers.filter(a => a.selectedIdx === a.correctIdx).length}</strong> out of {answers.length}</p>
-            <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-              {activeQuiz.questions.map((q, idx) => (
-                <div key={idx} className="bg-gray-800 p-3 rounded">
-                  <p className="text-sm font-semibold text-white">Q{idx + 1}: {q.question}</p>
-                  <p className={`text-sm mt-1 ${answers[idx].selectedIdx === q.correctIndex ? 'text-green-400' : 'text-red-400'}`}>
-                    Your answer: {q.options[answers[idx].selectedIdx]}
-                  </p>
-                  {answers[idx].selectedIdx !== q.correctIndex && (
-                    <p className="text-sm text-green-300">Correct answer: {q.options[q.correctIndex]}</p>
-                  )}
-                </div>
+      {quizStarted && !showResults && shuffledQuestions.length > 0 && (
+        <div className="mt-8">
+          <p className="text-sm text-gray-400 mb-2">Question {currentQuestion + 1} of {shuffledQuestions.length}</p>
+          <div className="bg-gray-800 rounded-lg p-6 mb-4">
+            <h2 className="text-xl font-bold mb-4">{shuffledQuestions[currentQuestion].question}</h2>
+            <div className="space-y-3">
+              {shuffledQuestions[currentQuestion].options.map((option, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleAnswer(i)}
+                  className="block w-full text-left px-4 py-3 rounded bg-gray-700 hover:bg-purple-600 transition-colors"
+                >
+                  {option}
+                </button>
               ))}
             </div>
-            <div className="text-right mt-4">
-              <button onClick={() => setActiveQuiz(null)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">Close</button>
-            </div>
           </div>
+        </div>
+      )}
+
+      {showResults && (
+        <div className="mt-10 bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-2">Quiz Results</h2>
+          <p className="text-gray-300 mb-4">You scored {score} out of {shuffledQuestions.length}</p>
+          <div className="space-y-4">
+            {shuffledQuestions.map((q, i) => (
+              <div
+                key={i}
+                className={`p-3 rounded border ${selectedAnswers[i] === q.correctIndex ? 'border-green-500' : 'border-red-500'}`}
+              >
+                <p className="font-semibold">Q{i + 1}: {q.question}</p>
+                <p>Your Answer: <span className="italic">{q.options[selectedAnswers[i]]}</span></p>
+                <p>Correct Answer: <span className="font-bold text-green-400">{q.options[q.correctIndex]}</span></p>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => {
+              setQuizStarted(false);
+              setShowResults(false);
+              setCurrentQuestion(0);
+              setSelectedAnswers([]);
+              setScore(0);
+            }}
+            className="mt-6 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
+          >
+            Restart Quest
+          </button>
         </div>
       )}
     </div>
   );
-};
+}
 
 export default RPGDashboard;

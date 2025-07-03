@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
-import Home from './Home';
+import Home from './pages/Home';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import Leaderboard from './components/Leaderboard';
 import Layout from './components/Layout';
 import RPGDashboard from './pages/RPGDashboard';
+import PhishingQuest from './pages/PhishingQuest';
 
 function App() {
   const [session, setSession] = useState(null);
-  console.log("Home rendered. Quests:", quests);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -33,7 +34,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/leaderboard" element={session ? <Leaderboard /> : <Navigate to="/login" />} />
-	  <Route path="/rpg/:id" element={session ? <RPGDashboard /> : <Navigate to="/login" />} />
+          <Route path="/rpg/1" element={session ? <PhishingQuest /> : <Navigate to="/login" />} />
+          <Route path="/rpg/:id" element={session ? <RPGDashboard /> : <Navigate to="/login" />} />
         </Routes>
       </Layout>
     </Router>
@@ -41,4 +43,3 @@ function App() {
 }
 
 export default App;
-
