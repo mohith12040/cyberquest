@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from './AuthLayout';
+import { motion } from 'framer-motion';
 
 function Login() {
   const navigate = useNavigate();
@@ -19,30 +20,36 @@ function Login() {
 
   return (
     <AuthLayout>
-      <h2 className="text-3xl font-bold mb-6 text-center text-purple-400">🔐 Cyber Quest</h2>
-      {errorMsg && <p className="text-red-400 mb-2 text-center">{errorMsg}</p>}
-      <form onSubmit={handleLogin} className="space-y-4">
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-3 bg-gray-800 rounded"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-3 bg-gray-800 rounded"
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button className="w-full bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded font-semibold">
-          Log In
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-gray-400 text-center">
-        Don’t have an account? <Link to="/signup" className="text-purple-300 underline">Sign up</Link>
-      </p>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="text-3xl font-bold mb-6 text-center text-purple-400">🔐 Cyber Quest Login</h2>
+        {errorMsg && <p className="text-red-400 mb-2 text-center">{errorMsg}</p>}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full p-3 bg-gray-800 rounded"
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 bg-gray-800 rounded"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button className="w-full bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded font-semibold">
+            Log In
+          </button>
+        </form>
+        <p className="mt-4 text-sm text-gray-400 text-center">
+          Don’t have an account? <Link to="/signup" className="text-purple-300 underline">Sign up</Link>
+        </p>
+      </motion.div>
     </AuthLayout>
   );
 }

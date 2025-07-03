@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { motion } from 'framer-motion';
 
 const quests = [
   {
@@ -47,15 +48,23 @@ function Home({ session }) {
         .eq('id', session.user.id)
         .single();
 
-      if (data?.username) setUsername(data.username);
-      else console.error('Username fetch failed:', error?.message);
+      if (data) {
+        setUsername(data.username);
+      } else {
+        console.error('Error fetching username:', error?.message);
+      }
     };
 
     getUsername();
   }, [session]);
 
   return (
-    <div className="px-4 py-8 text-white min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="px-4 py-8 text-white min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900"
+    >
       <h1 className="text-4xl font-bold mb-2">Welcome to CyberQuest</h1>
       <p className="text-gray-400 mb-6">
         Logged in as <span className="text-white font-semibold">{username || session.user.email}</span>
@@ -67,14 +76,14 @@ function Home({ session }) {
           <Link
             key={quest.id}
             to={`/rpg/${quest.id}`}
-            className="block bg-gray-800 rounded p-4 shadow hover:shadow-lg transition-all"
+            className="block bg-gray-800 rounded p-4 shadow hover:shadow-xl transition-all hover:scale-[1.02]"
           >
-            <h3 className="text-xl font-bold mb-1">{quest.title}</h3>
+            <h3 className="text-xl font-bold mb-1 text-purple-300">{quest.title}</h3>
             <p className="text-sm text-gray-300">{quest.description}</p>
           </Link>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

@@ -65,7 +65,13 @@ function PhishingQuest({ session }) {
   if (loading) return <div className="text-white p-4">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 py-8 flex flex-col items-center justify-start">
+    <motion.div
+      className="min-h-screen bg-gray-950 text-white px-4 py-8 flex flex-col items-center justify-start"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="max-w-3xl w-full">
         {!startQuiz ? (
           <motion.div
@@ -154,7 +160,7 @@ function PhishingQuest({ session }) {
           </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
